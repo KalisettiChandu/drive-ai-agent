@@ -51,7 +51,7 @@ if user_input:
             response = requests.post(
                 f"{BACKEND_URL}/chat",
                 json={"message": user_input},
-                timeout=60,
+                timeout=120,
             )
         except requests.RequestException as exc:
             st.error(f"Backend request failed: {exc}")
@@ -63,7 +63,7 @@ if user_input:
                 err = response.json()
             except ValueError:
                 err = {"detail": response.text}
-            st.error(f"Backend error ({response.status_code}): {err.get('detail', err)}")
+            st.error("Backend is waking up. Please wait 30-60 seconds and try again.")
             st.stop()
 
         try:
