@@ -2,8 +2,7 @@ import streamlit as st
 import requests
 import os
 
-
-BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://drive-ai-backend-6nka.onrender.com").rstrip("/")
 
 # Page configuration
 st.set_page_config(
