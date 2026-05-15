@@ -1,5 +1,9 @@
 import streamlit as st
 import requests
+import os
+
+
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
 
 # Page configuration
 st.set_page_config(
@@ -44,23 +48,45 @@ if user_input:
     with st.spinner("Searching Google Drive..."):
 
         # Send request to backend
-        response = requests.post(
-            "http://127.0.0.1:8000/chat",
-            json={"message": user_input}
-        )
+        try:
+            response = requests.post(
+                f"{BACKEND_URL}/chat",
+                json={"message": user_input},
+                timeout=60,
+            )
+        except requests.RequestException as exc:
+            st.error(f"Backend request failed: {exc}")
+            st.stop()
 
-        data = response.json()
+        if not response.ok:
+            # FastAPI returns JSON for handled errors; show text fallback too.
+            try:
+                err = response.json()
+            except ValueError:
+                err = {"detail": response.text}
+            st.error(f"Backend error ({response.status_code}): {err.get('detail', err)}")
+            st.stop()
+
+        try:
+            data = response.json()
+        except ValueError:
+            st.error("Backend returned a non-JSON response.")
+            st.code(response.text)
+            st.stop()
 
     # Show assistant response
     with st.chat_message("assistant"):
 
         st.write("### Generated Query")
 
+        if data.get("usedFallback"):
+            st.info("Using fallback query generator (LLM unavailable).")
+
         st.code(data["query"])
 
         st.write("### Files Found")
 
-        files = data["files"]
+        files = data.get("files", [])
 
         # Empty results
         if not files:
