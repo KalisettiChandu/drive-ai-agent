@@ -51,7 +51,7 @@ if user_input:
             response = requests.post(
                 f"{BACKEND_URL}/chat",
                 json={"message": user_input},
-                timeout=120,
+                timeout=180,
             )
         except requests.RequestException as exc:
             st.error(f"Backend request failed: {exc}")
